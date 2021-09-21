@@ -34,6 +34,8 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
   List _selectedEvents;
   AnimationController _animationController;
   DateTime _selectedDay;
+  DateTime _focusedDay;
+  CalendarFormat _calendarFormat;
 
   @override
   void initState() {
@@ -59,30 +61,30 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
     super.dispose();
   }
 
-  void _onDaySelected(DateTime day, List events) {
-    onLoadingDialog(context);
-    AttendanceDatabase.getAttendanceListOfParticularDateBasedOnUID(
-            widget.user.uid, day)
-        .then((AttendanceList attendanceList) {
-      print(attendanceList.attendanceList);
-      attendanceList.attendanceList.forEach((Attendance attendance) {
-        print(attendance.office);
-        events.add(
-            "Type: ${attendance.type.toString().split('.').last} Time: ${attendance.time.hour} hours ${attendance.time.minute} minutes at ${attendance.office} ");
-        setState(() {
-          _selectedEvents = events;
-        });
-      });
-
-      if (attendanceList.attendanceList.length == 0) {
-        setState(() {
-          _selectedEvents = [];
-        });
-      }
-
-      Navigator.of(context, rootNavigator: true).pop('dialog');
-    });
-  }
+  // void _onDaySelected(DateTime day, List events) {
+  //   onLoadingDialog(context);
+  //   AttendanceDatabase.getAttendanceListOfParticularDateBasedOnUID(
+  //           widget.user.uid, day)
+  //       .then((AttendanceList attendanceList) {
+  //     print(attendanceList.attendanceList);
+  //     attendanceList.attendanceList.forEach((Attendance attendance) {
+  //       print(attendance.office);
+  //       events.add(
+  //           "Type: ${attendance.type.toString().split('.').last} Time: ${attendance.time.hour} hours ${attendance.time.minute} minutes at ${attendance.office} ");
+  //       setState(() {
+  //         _selectedEvents = events;
+  //       });
+  //     });
+  //
+  //     if (attendanceList.attendanceList.length == 0) {
+  //       setState(() {
+  //         _selectedEvents = [];
+  //       });
+  //     }
+  //
+  //     Navigator.of(context, rootNavigator: true).pop('dialog');
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -205,63 +207,43 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
             ),
           );
         },
-        markersBuilder: (context, date, events, holidays) {
-          final children = <Widget>[];
-
-          if (events.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: 1,
-                bottom: 1,
-                child: _buildEventsMarker(date, events),
-              ),
-            );
-          }
-
-          if (holidays.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: -2,
-                top: -2,
-                child: _buildHolidaysMarker(),
-              ),
-            );
-          }
-          return children;
-        },
       ),
-      onDaySelected: (date, events) {
-        _selectedDay = date;
-        _onDaySelected(date, events);
-        _animationController.forward(from: 0.0);
+
+      selectedDayPredicate: (day) {
+        // Use `selectedDayPredicate` to determine which day is currently selected.
+        // If this returns true, then `day` will be marked as selected.
+
+        // Using `isSameDay` is recommended to disregard
+        // the time-part of compared DateTime objects.
+        return isSameDay(_selectedDay, day);
       },
+      onDaySelected: (selectedDay, focusedDay) {
+        if (!isSameDay(_selectedDay, selectedDay)) {
+          // Call `setState()` when updating the selected day
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+          });
+        }
+      },
+      onFormatChanged: (format) {
+        if (_calendarFormat != format) {
+          // Call `setState()` when updating calendar format
+          setState(() {
+            _calendarFormat = format;
+          });
+        }
+      },
+      onPageChanged: (focusedDay) {
+        // No need to call `setState()` here
+        _focusedDay = focusedDay;
+      },
+
     );
+
+
   }
 
-  Widget _buildEventsMarker(DateTime date, List events) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _calendarController.isSelected(date)
-            ? Colors.brown[500]
-            : _calendarController.isToday(date)
-                ? Colors.brown[300]
-                : Colors.blue[400],
-      ),
-      width: 16.0,
-      height: 16.0,
-      child: Center(
-        child: Text(
-          '${events.length}',
-          style: TextStyle().copyWith(
-            color: Colors.white,
-            fontSize: 12.0,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildHolidaysMarker() {
     return Icon(
@@ -288,7 +270,7 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
               ),
               onPressed: () {
                 setState(() {
-                  _calendarController.setCalendarFormat(CalendarFormat.month);
+                  // _calendarController.setCalendarFormat(CalendarFormat.month);
                 });
               },
             ),
@@ -302,8 +284,8 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
               ),
               onPressed: () {
                 setState(() {
-                  _calendarController
-                      .setCalendarFormat(CalendarFormat.twoWeeks);
+                  // _calendarController
+                  //     .setCalendarFormat(CalendarFormat.twoWeeks);
                 });
               },
             ),
@@ -317,7 +299,7 @@ class _AttendanceSummaryState extends State<AttendanceSummary>
               ),
               onPressed: () {
                 setState(() {
-                  _calendarController.setCalendarFormat(CalendarFormat.week);
+                  CalendarFormat.week;
                 });
               },
             ),

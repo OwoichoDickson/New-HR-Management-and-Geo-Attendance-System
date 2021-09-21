@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/sysroot/home/harpreet/lib/flutter/stable"
-export "FLUTTER_APPLICATION_PATH=/sysroot/home/harpreet/AndroidStudioProjects/flutter/HR-Management-and-Geo-Attendance-System"
+export "FLUTTER_ROOT=/Users/5ran6/dev/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/5ran6/StudioProjects/New-HR-Management-and-Geo-Attendance-System"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"
